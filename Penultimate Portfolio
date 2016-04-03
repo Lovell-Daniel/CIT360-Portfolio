@@ -1,0 +1,91 @@
+Java Collections
+Me teaching my team: https://youtu.be/_tH8O6tRGDk?t=35m34s
+-HashMap with puts and gets:
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/HandlerMap.java
+-HashSet with adds, embedded ArrayLists with adds, nested iterators of two types (enhanced for loop and Iterator while loop):
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/model/DummyData.java
+
+Hibernate
+Me teaching my team: https://youtu.be/K4qqvMjveoo?t=11m54s
+SQL needed to create database:
+CREATE DATABASE `cit360_lovell_daniel` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id` FOREIGN KEY (`id`) REFERENCES `yelpresponse` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `yelpresponse` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
+  `json` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-Config and Mapping Files:
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/tree/master/cit360-server/resources
+-I have two versions of a SessionFactory. The synchronized thread-safe version is commented out. I am using the Bill Pugh thread-safe version. I would like to try the ENUM singleton pattern next.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/HibernateUtility.java
+
+JSON
+-The JSON string responses from Yelp are stored as a string in the YelpResponses class along with a timestamp.
+-The User class has an ArrayList of all of the YelpReponses for a user.
+-On lines 29-32 in Last3Handler I convert all of the YelpResponses (each contain a JSON string and a time stamp) for a User into a JSONArray.
+-The JSONArray object contains an array of objects. Each object has two keys for retrieving values; time and json.
+-The JSONArray object is then converted to a JSON string and returned back through the call stack until it is sent to the client through the socket.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/Last3Handler.java
+
+HTTP URLConnection
+Me teaching my team: https://youtu.be/J5DkXlwVhjM?t=1m9s
+-SampleYelp connects to a PHP script that I wrote that acts as a Yelp API. If the script is called by itself it returns a result based on predefined search terms.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/SampleYelp.java
+
+JUnit Tests
+-ResponseHandlerTest creates an ArrayList of test cases. Each test case contains the test data and correlating expected result.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/test/edu/byui/cit360/lovell_daniel/controller/ResponseHandlerTest.java
+
+Threads, Executors, Runnables, Handlers
+-Normally a ServerSocket doesn't need to run in its own thread, but I wanted to be able to interact through the console while the server was running. So, the ServerSocket loop is in its own thread.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/StartHandler.java
+--StartServer contains the ServerSocket loop. Every time a client connects the Socket gets passed into a new thread and the server starts waiting for new connections again.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/StartServer.java
+---ServerView, in the new thread, take the Socket object and handles the communication between the client and the server.
+---https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/view/ServerView.java
+
+Model View Controller Pattern
+-I separated all of my code into three packages; model, view, and controller.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/tree/master/cit360-server/src/edu/byui/cit360/lovell_daniel
+--Model contains the objects that hold or return the data of the app. My app tracks users and Yelp responses.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/tree/master/cit360-server/src/edu/byui/cit360/lovell_daniel/model
+--Views display information and wait for input.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/tree/master/cit360-server/src/edu/byui/cit360/lovell_daniel/view
+---View objects display to the console and get input from the console also.
+---https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/view/View.java
+---ServerView objects display to the socket and get input from the socket also.
+---https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/view/ServerView.java
+--Controller contains all of the rest of the code. It is the intermediary between the View and the Model. It also contains the Application Controller framework.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/tree/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller
+
+Application Controller Pattern
+-ApplicationController object is created and handleRequest(String request, ArrayList<String> data) is called. Request determines the handler that is requested. Data is the information that the requested handler will need.
+-https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/CIT360Server.java
+--HandlerMap object is created. isValidRequest(String request) is called to check is the request is valid. getHandler(String request) is called.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/ApplicationController.java
+---HandlerMap contains a HashMap that returns a new Handler object when the correlating key is requested. All of the handlers are sub-classes of the Handler class.
+---https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/HandlerMap.java
+----Handler is an abstract class that requires all sub-classes to implement String handleIt(ArrayList<String> data).
+----https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/Handler.java
+--handleIt(ArrayList<String> data) is called in the returned Handler object.
+--Sample Handler: https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/MenuHandler.java
+--Sample Handler: https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/Last3Handler.java
+---The handler takes the data and uses it to do the handler's job. Then it returns a String backwards through the call stack.
+
+Client and Server Sockets
+-Server
+--A new ServerSocket object waits for a client connection. The accept() method creates a new Socket object when a client connects. This Socket object is passed to a new ServerView object in a new thread. The loop repeats by creating a new ServerSocket to listen for a client.
+--https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/controller/StartServer.java
+---The new Socket object has an OutputStream and an Input Stream that can be used to communicate with the client.
+---https://github.com/Lovell-Daniel/cit360-lovell-daniel/blob/master/cit360-server/src/edu/byui/cit360/lovell_daniel/view/ServerView.java
+-Client
+--The client is basically the same thing as the server except that the Socket isn't created by the accept() method of the ServerSocket. It needs to be directly created.
+--I created the client socket on our team project. - Lines 46-78
+--https://github.com/Lovell-Daniel/Team1-W16-CIT360/blob/master/Client/src/cit360/team1/view/HomeView.java
